@@ -1,17 +1,62 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <h3>Posting on the Board</h3>
+    <label for="name" >Username: </label>
+    <input id="name" type="text" v-model="name">
+    <br><br>
+    <label for="comment">Comment: </label>
+    <textarea id="comment" v-model="comment"></textarea>
+    <br><br>
+    <button @click="createComment">Submit</button>
+    <h2>Board</h2>
+    <div v-for="post in posts" :key="post.name">
+      <div>Username: {{ post.fields.name.stringValue }}</div>
+      <div>Comment: {{ post.fields.comment.stringValue }}</div>
+      <br>
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import axios from "./axiosAuth";
 
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
+  data() {
+    return {
+      name: "",
+      comment: "",
+      posts: []
+    }
+  },
+  created() {
+    axios.get("/comments")
+    .then(responce => {
+      this.posts = responce.data.documents;
+    });
+  },
+  methods: {
+    createComment() {
+      axios
+        .post("/comments", {
+          fields: {
+            name: {
+              stringValue: this.name
+            },
+            comment: {
+              stringValue: this.comment
+            }
+          }
+        })
+        .then(responce => {
+          console.log(responce);
+        })
+        .catch(error => {
+          console.log(error);
+
+        });
+      this.name = "";
+      this.comment = "";
+    }
   }
 }
 </script>
